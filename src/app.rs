@@ -1,7 +1,5 @@
-use crate::{
-    transitions::{PracticeSessionState, SessionStates},
-    utils::match_states,
-};
+use crate::transitions::{PracticeSessionState, SessionStates};
+use crate::utils::match_states;
 
 use egui::{Align, Direction};
 use log::{debug, info};
@@ -23,16 +21,8 @@ impl PracticeSessionState {
 }
 
 impl eframe::App for PracticeSessionState {
-    /// Called by the frame work to save state before shutdown.
-    fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        eframe::set_value(storage, eframe::APP_KEY, self);
-    }
-
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
-        // For inspiration and more examples, go to https://emilk.github.io/egui
-
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
@@ -51,10 +41,16 @@ impl eframe::App for PracticeSessionState {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            let mut open = true;
+            // TODO: (ozerova) - Make the "X" button in the UI change the state.
+            // egui::Window::new("Reports")
+            //     .open(&mut self.report_enabled)
+            //     .resizable([true, true])
+            //     .default_width(100.0)
+            //     .show(ctx, |ui| ui.heading("WIP: reports"));
+
             egui::Window::new("Jovian Cycles")
-                .open(&mut open)
-                .resizable([true, false])
+                .open(&mut self.cycle_window_open.clone())
+                .resizable([true, true])
                 .default_width(100.0)
                 .show(ctx, |ui| {
                     ui.vertical_centered_justified(|ui| {
@@ -193,7 +189,7 @@ impl eframe::App for PracticeSessionState {
                                             match_states(self);
 
                                             // Send command to exit
-                                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                                            // ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                                         }
                                     },
                                 );
@@ -201,18 +197,24 @@ impl eframe::App for PracticeSessionState {
 
                         ui.separator();
 
+                        ui.label("Created by Alexei Ozerov.");
                         ui.add(egui::github_link_file!(
                             "https://github.com/alexei-ozerov/jovian-cycles/tree/main/",
                             "Source code."
                         ));
 
-                        ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
+                        ui.with_layout(egui::Layout::bottom_up(Align::LEFT), |ui| {
                             powered_by_egui_and_eframe(ui);
                             egui::warn_if_debug_build(ui);
                         });
                     });
                 });
         });
+    }
+
+    /// Called by the framework to save state before shutdown.
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        eframe::set_value(storage, eframe::APP_KEY, self);
     }
 }
 

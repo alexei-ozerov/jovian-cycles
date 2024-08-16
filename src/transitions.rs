@@ -15,9 +15,13 @@ pub enum SessionStates {
     Finishing,
 }
 
-#[serde(default)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(default)]
 pub struct PracticeSessionState {
+    #[serde(skip)]
+    pub report_enabled: bool,
+    #[serde(skip)]
+    pub cycle_window_open: bool,
     #[serde(skip)]
     pub note_name_list: Vec<String>,
     #[serde(skip)]
@@ -39,6 +43,8 @@ pub struct PracticeSessionState {
 impl Default for PracticeSessionState {
     fn default() -> Self {
         PracticeSessionState {
+            report_enabled: false,
+            cycle_window_open: true,
             note_name_list: vec![
                 "C".to_owned(),
                 "C#".to_owned(),
@@ -110,7 +116,7 @@ impl PracticeSessionState {
             None => {}
             Some(history) => {
                 let length = history.len();
-                let previous_state_time_code = &history[(length - 2) as usize];
+                let previous_state_time_code = &history[length - 2];
                 let previous_state_name = &previous_state_time_code.0;
 
                 debug!("{:#?}", length);

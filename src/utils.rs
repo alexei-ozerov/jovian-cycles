@@ -51,6 +51,7 @@ pub fn match_states(state: &mut PracticeSessionState) {
             }
 
             info!("Gracefully exiting practice session.");
+            state.report_enabled = true;
         }
         SessionStates::Waiting => {
             debug!("Waiting for a request for a new key or quit.");
