@@ -1,25 +1,9 @@
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
-#[derive(serde::Deserialize, serde::Serialize)]
-#[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct TemplateApp {
-    // Example stuff:
-    label: String,
+use crate::{
+    transitions::{PracticeSessionState, SessionStates},
+    utils::match_states,
+};
 
-    #[serde(skip)] // This how you opt-out of serialization of a field
-    value: f32,
-}
-
-impl Default for TemplateApp {
-    fn default() -> Self {
-        Self {
-            // Example stuff:
-            label: "Hello World!".to_owned(),
-            value: 2.7,
-        }
-    }
-}
-
-impl TemplateApp {
+impl PracticeSessionState {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
@@ -35,7 +19,7 @@ impl TemplateApp {
     }
 }
 
-impl eframe::App for TemplateApp {
+impl eframe::App for PracticeSessionState {
     /// Called by the frame work to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
@@ -47,8 +31,6 @@ impl eframe::App for TemplateApp {
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
-
             egui::menu::bar(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
                 let is_web = cfg!(target_arch = "wasm32");
@@ -66,23 +48,78 @@ impl eframe::App for TemplateApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("eframe template");
+            ui.heading("Jovian Cycles Practice Tool.");
+            ui.heading(format!(
+                "{:#?}",
+                match self.session_data.current_key_data {
+                    Some(data) => {
+                        format!(
+                            "Your current key is: {}",
+                            self.note_name_list[data.nid].clone()
+                        )
+                    }
+                    None => {
+                        "No current key generated".to_owned()
+                    }
+                }
+            ));
 
-            ui.horizontal(|ui| {
-                ui.label("Write something: ");
-                ui.text_edit_singleline(&mut self.label);
-            });
+            if ui.button("Request New Key").clicked() {
+                self.to_requesting_new_key();
+                match_states(self);
+            }
 
-            ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1.0;
+            let mut working_button_on = false;
+            let mut resting_button_on = false;
+            match self.session_state {
+                SessionStates::Working => {
+                    working_button_on = false;
+                    resting_button_on = true;
+                }
+                SessionStates::Resting => {
+                    working_button_on = true;
+                    resting_button_on = false;
+                }
+                SessionStates::Waiting => {
+                    working_button_on = false;
+                    resting_button_on = false;
+                }
+                _ => todo!(),
+            };
+
+            if ui
+                .add_enabled(working_button_on, egui::Button::new("Resume Practice"))
+                .clicked()
+            {
+                if working_button_on {
+                    unreachable!();
+                } else {
+                    self.to_working();
+                    match_states(self);
+                }
+            }
+
+            if ui
+                .add_enabled(resting_button_on, egui::Button::new("Rest"))
+                .clicked()
+            {
+                if resting_button_on {
+                    unreachable!();
+                } else {
+                    self.to_resting();
+                    match_states(self);
+                }
+            }
+
+            if ui.button("End Practice Session").clicked() {
+                self.to_resting();
+                match_states(self);
             }
 
             ui.separator();
 
             ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/main/",
+                "https://github.com/alexei-ozerov/jovian-cycles",
                 "Source code."
             ));
 
