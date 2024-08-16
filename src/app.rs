@@ -1,8 +1,8 @@
 use crate::transitions::{PracticeSessionState, SessionStates};
 use crate::utils::match_states;
 
-use egui::{Align, Direction};
-use log::{debug, info};
+use egui::{Align, Direction, Visuals};
+use log::{debug, info, error};
 
 impl PracticeSessionState {
     /// Called once before the first frame.
@@ -23,6 +23,7 @@ impl PracticeSessionState {
 impl eframe::App for PracticeSessionState {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
@@ -36,7 +37,12 @@ impl eframe::App for PracticeSessionState {
                     ui.add_space(16.0);
                 }
 
-                egui::widgets::global_dark_light_mode_buttons(ui);
+                ui.horizontal(|ui| {
+                    ui.selectable_value(&mut self.theme, catppuccin_egui::LATTE, "☀ Light");
+                    ui.selectable_value(&mut self.theme, catppuccin_egui::MOCHA, "🌙 Dark");
+                });
+
+                catppuccin_egui::set_theme(ctx, self.theme);
             });
         });
 

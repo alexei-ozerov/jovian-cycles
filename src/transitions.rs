@@ -19,6 +19,8 @@ pub enum SessionStates {
 #[serde(default)]
 pub struct PracticeSessionState {
     #[serde(skip)]
+    pub theme: catppuccin_egui::Theme,
+    #[serde(skip)]
     pub report_enabled: bool,
     #[serde(skip)]
     pub cycle_window_open: bool,
@@ -43,6 +45,7 @@ pub struct PracticeSessionState {
 impl Default for PracticeSessionState {
     fn default() -> Self {
         PracticeSessionState {
+            theme: catppuccin_egui::LATTE,
             report_enabled: false,
             cycle_window_open: true,
             note_name_list: vec![
