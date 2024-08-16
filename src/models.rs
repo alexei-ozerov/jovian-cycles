@@ -72,7 +72,10 @@ impl PracticeSessionData {
         match self.current_key_data {
             Some(ref mut data) => {
                 data.repetitions += 1;
-                debug!("{:#?}", self.current_key_data);
+
+                // Update all keys map
+                self.all_keys_map.0[data.nid] = data.clone();
+
                 Ok(self)
             }
             None => {

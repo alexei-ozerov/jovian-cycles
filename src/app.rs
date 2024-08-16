@@ -3,6 +3,8 @@ use crate::{
     utils::match_states,
 };
 
+use log::debug;
+
 impl PracticeSessionState {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
@@ -48,7 +50,7 @@ impl eframe::App for PracticeSessionState {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Jovian Cycles Practice Tool.");
+            ui.heading("Jovian Cycles Practice Tool");
             ui.heading(format!(
                 "{:#?}",
                 match self.session_data.current_key_data {
@@ -64,14 +66,13 @@ impl eframe::App for PracticeSessionState {
                 }
             ));
 
-            if ui.button("Request New Key").clicked() {
-                self.to_requesting_new_key();
-                match_states(self);
-            }
-
             let mut working_button_on = false;
             let mut resting_button_on = false;
             match self.session_state {
+                SessionStates::RequestingNewKey => {
+                    working_button_on = true;
+                    resting_button_on = false;
+                }
                 SessionStates::Working => {
                     working_button_on = false;
                     resting_button_on = true;
@@ -84,18 +85,23 @@ impl eframe::App for PracticeSessionState {
                     working_button_on = false;
                     resting_button_on = false;
                 }
-                _ => todo!(),
+                _ => {}
             };
+
+            if ui.button("Request New Key").clicked() {
+                self.to_requesting_new_key();
+                match_states(self);
+            }
 
             if ui
                 .add_enabled(working_button_on, egui::Button::new("Resume Practice"))
                 .clicked()
             {
                 if working_button_on {
-                    unreachable!();
-                } else {
                     self.to_working();
                     match_states(self);
+                } else {
+                    debug!("Button not currently functional in this state");
                 }
             }
 
@@ -104,22 +110,25 @@ impl eframe::App for PracticeSessionState {
                 .clicked()
             {
                 if resting_button_on {
-                    unreachable!();
-                } else {
                     self.to_resting();
                     match_states(self);
+                } else {
+                    debug!("Button not currently functional in this state");
                 }
             }
 
             if ui.button("End Practice Session").clicked() {
-                self.to_resting();
+                self.to_finishing();
                 match_states(self);
+
+                // Send command to exit
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
 
             ui.separator();
 
             ui.add(egui::github_link_file!(
-                "https://github.com/alexei-ozerov/jovian-cycles",
+                "https://github.com/alexei-ozerov/jovian-cycles/",
                 "Source code."
             ));
 

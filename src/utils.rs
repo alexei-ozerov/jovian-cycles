@@ -1,6 +1,6 @@
 use crate::transitions::{PracticeSessionState, SessionStates};
 
-use log::{error, info};
+use log::{debug, error, info};
 
 pub fn match_states(state: &mut PracticeSessionState) {
     match state.session_state {
@@ -49,6 +49,8 @@ pub fn match_states(state: &mut PracticeSessionState) {
             info!("Gracefully exiting practice session.");
             state.finished_flag = true;
         }
-        SessionStates::Waiting => todo!(),
+        SessionStates::Waiting => {
+            debug!("Waiting for a request for a new key or quit.");
+        }
     };
 }

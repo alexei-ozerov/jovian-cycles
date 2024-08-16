@@ -17,9 +17,13 @@ pub enum SessionStates {
 #[serde(default)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct PracticeSessionState {
+    #[serde(skip)]
     pub finished_flag: bool,
+    #[serde(skip)]
     pub note_name_list: Vec<String>,
+    #[serde(skip)]
     pub session_state: SessionStates,
+    #[serde(skip)]
     pub session_data: PracticeSessionData,
 }
 
@@ -68,13 +72,11 @@ impl PracticeSessionState {
     // (Requesting New Key) State function
     pub fn requesting_new_key(&mut self) {
         self.session_data.get_new_key();
-        self.to_working();
     }
 
     // (Working) Transition function
     pub fn to_working(&mut self) {
         self.session_state = SessionStates::Working;
-
         self.session_data.get_timestamp("Working".to_string());
     }
 
