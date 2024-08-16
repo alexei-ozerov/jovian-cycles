@@ -55,7 +55,7 @@ impl eframe::App for PracticeSessionState {
             egui::Window::new("Jovian Cycles")
                 .open(&mut open)
                 .resizable([true, false])
-                .default_width(280.0)
+                .default_width(230.0)
                 .show(ctx, |ui| {
                     ui.vertical_centered_justified(|ui| {
                         egui::Grid::new("center_pane")
