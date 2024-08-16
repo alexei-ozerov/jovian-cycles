@@ -6,8 +6,12 @@ pub fn match_states(state: &mut PracticeSessionState) {
     match state.session_state {
         SessionStates::RequestingNewKey => {
             state.requesting_new_key();
+            state.to_working();
+            state.working();
         }
         SessionStates::Working => {
+            // TODO: (ozerova) - Fix the fact that swapping from resting to working increases the
+            //                   repetition counter when it should not.
             state.working();
         }
         SessionStates::Resting => {
@@ -47,7 +51,6 @@ pub fn match_states(state: &mut PracticeSessionState) {
             }
 
             info!("Gracefully exiting practice session.");
-            state.finished_flag = true;
         }
         SessionStates::Waiting => {
             debug!("Waiting for a request for a new key or quit.");

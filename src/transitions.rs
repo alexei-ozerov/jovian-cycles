@@ -1,5 +1,6 @@
 use crate::models::PracticeSessionData;
-use log::error;
+
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 
 /*
@@ -17,8 +18,6 @@ pub enum SessionStates {
 #[serde(default)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct PracticeSessionState {
-    #[serde(skip)]
-    pub finished_flag: bool,
     #[serde(skip)]
     pub note_name_list: Vec<String>,
     #[serde(skip)]
@@ -40,7 +39,6 @@ pub struct PracticeSessionState {
 impl Default for PracticeSessionState {
     fn default() -> Self {
         PracticeSessionState {
-            finished_flag: false,
             note_name_list: vec![
                 "C".to_owned(),
                 "C#".to_owned(),
@@ -66,7 +64,8 @@ impl PracticeSessionState {
     pub fn to_requesting_new_key(&mut self) {
         self.session_state = SessionStates::RequestingNewKey;
         self.session_data
-            .get_timestamp("Requesting New Key".to_string());
+            .set_timestamp("Requesting New Key".to_string());
+        self.session_data.push_timestamp();
     }
 
     // (Requesting New Key) State function
@@ -77,11 +76,12 @@ impl PracticeSessionState {
     // (Working) Transition function
     pub fn to_working(&mut self) {
         self.session_state = SessionStates::Working;
-        self.session_data.get_timestamp("Working".to_string());
+        self.session_data.set_timestamp("Working".to_string());
+        self.session_data.push_timestamp();
     }
 
-    // (Working) State function
-    pub fn working(&mut self) {
+    // (Working) State functions
+    fn increment_key(&mut self) {
         match self.session_data.clone().increment_key_repetition() {
             Ok(data) => {
                 self.session_data = data;
@@ -93,17 +93,49 @@ impl PracticeSessionState {
         };
     }
 
+    pub fn decrement_key(&mut self) {
+        match self.session_data.clone().decrement_key_repetition() {
+            Ok(data) => {
+                self.session_data = data;
+            }
+            Err(e) => {
+                error!("{:#?}", e);
+                self.session_state = SessionStates::RequestingNewKey;
+            }
+        };
+    }
+
+    pub fn working(&mut self) {
+        match self.session_data.clone().practice_session_history {
+            None => {}
+            Some(history) => {
+                let length = history.len();
+                let previous_state_time_code = &history[(length - 2) as usize];
+                let previous_state_name = &previous_state_time_code.0;
+
+                debug!("{:#?}", length);
+                debug!("{:#?}", previous_state_time_code);
+                debug!("{:#?}", previous_state_name);
+
+                if previous_state_name == "Requesting New Key" {
+                    self.increment_key();
+                };
+            }
+        };
+    }
+
     // (Resting) Transition function
     pub fn to_resting(&mut self) {
         self.session_state = SessionStates::Resting;
-
-        self.session_data.get_timestamp("Resting".to_string());
+        self.session_data.set_timestamp("Resting".to_string());
+        self.session_data.push_timestamp();
     }
 
     // (Finishing) Transition function
     pub fn to_finishing(&mut self) {
         self.session_state = SessionStates::Finishing;
-        self.session_data.get_timestamp("Finishing".to_string());
+        self.session_data.set_timestamp("Finishing".to_string());
+        self.session_data.push_timestamp();
     }
 
     // (Finishing) State function
