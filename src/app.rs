@@ -51,141 +51,176 @@ impl eframe::App for PracticeSessionState {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.vertical_centered_justified(|ui| {
-                egui::Grid::new("center_pane")
-                    .min_col_width(200.0)
-                    .max_col_width(250.0)
-                    .show(ui, |ui| {
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            ui.heading("Jovian Cycles Practice Tool");
-                        });
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            match self.session_data.current_key_data {
-                                Some(data) => {
-                                    ui.heading(format!(
-                                        "Your current key is: {}",
-                                        self.note_name_list[data.nid].clone()
-                                    ));
-                                }
-                                None => {
-                                    ui.heading("No current key.");
-                                }
-                            }
-                        });
+            let mut open = true;
+            egui::Window::new("Jovian Cycles")
+                .open(&mut open)
+                .resizable([true, false])
+                .default_width(280.0)
+                .show(ctx, |ui| {
+                    ui.vertical_centered_justified(|ui| {
+                        egui::Grid::new("center_pane")
+                            .min_col_width(150.0)
+                            .max_col_width(200.0)
+                            .show(ui, |ui| {
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        ui.heading("Jovian Cycles Practice Tool");
+                                    },
+                                );
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| match self.session_data.current_key_data {
+                                        Some(data) => {
+                                            ui.heading(format!(
+                                                "Your current key is: {}",
+                                                self.note_name_list[data.nid].clone()
+                                            ));
+                                        }
+                                        None => {
+                                            ui.heading("No current key.");
+                                        }
+                                    },
+                                );
 
-                        ui.end_row();
+                                ui.end_row();
 
-                        let mut working_button_on = false;
-                        let mut resting_button_on = false;
-                        let mut skip_button_on = false;
-                        match self.session_state {
-                            SessionStates::RequestingNewKey => {
-                                working_button_on = true;
-                                resting_button_on = false;
-                                skip_button_on = false;
-                            }
-                            SessionStates::Working => {
-                                working_button_on = false;
-                                resting_button_on = true;
-                                skip_button_on = true;
-                            }
-                            SessionStates::Resting => {
-                                working_button_on = true;
-                                resting_button_on = false;
-                                skip_button_on = true;
-                            }
-                            SessionStates::Waiting => {
-                                working_button_on = false;
-                                resting_button_on = false;
-                                skip_button_on = false;
-                            }
-                            _ => {}
-                        };
+                                let mut working_button_on = false;
+                                let mut resting_button_on = false;
+                                let mut skip_button_on = false;
+                                match self.session_state {
+                                    SessionStates::RequestingNewKey => {
+                                        working_button_on = true;
+                                        resting_button_on = false;
+                                        skip_button_on = false;
+                                    }
+                                    SessionStates::Working => {
+                                        working_button_on = false;
+                                        resting_button_on = true;
+                                        skip_button_on = true;
+                                    }
+                                    SessionStates::Resting => {
+                                        working_button_on = true;
+                                        resting_button_on = false;
+                                        skip_button_on = true;
+                                    }
+                                    SessionStates::Waiting => {
+                                        working_button_on = false;
+                                        resting_button_on = false;
+                                        skip_button_on = false;
+                                    }
+                                    _ => {}
+                                };
 
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            if ui.button("Request New Key").clicked() {
-                                self.to_requesting_new_key();
-                                match_states(self);
-                            }
-                        });
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        if ui.button("Request New Key").clicked() {
+                                            self.to_requesting_new_key();
+                                            match_states(self);
+                                        }
+                                    },
+                                );
 
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            if ui
-                                .add_enabled(skip_button_on, egui::Button::new("Skip Selected Key"))
-                                .clicked()
-                            {
-                                if skip_button_on {
-                                    info!("Skipping current key!");
-                                    self.decrement_key();
-                                    self.to_requesting_new_key();
-                                    match_states(self);
-                                } else {
-                                    debug!("Button not currently functional in this state");
-                                }
-                            }
-                        });
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        if ui
+                                            .add_enabled(
+                                                skip_button_on,
+                                                egui::Button::new("Skip Selected Key"),
+                                            )
+                                            .clicked()
+                                        {
+                                            if skip_button_on {
+                                                info!("Skipping current key!");
+                                                self.decrement_key();
+                                                self.to_requesting_new_key();
+                                                match_states(self);
+                                            } else {
+                                                debug!(
+                                                    "Button not currently functional in this state"
+                                                );
+                                            }
+                                        }
+                                    },
+                                );
 
-                        ui.end_row();
+                                ui.end_row();
 
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            if ui
-                                .add_enabled(
-                                    resting_button_on,
-                                    egui::Button::new("Pause Practice Session"),
-                                )
-                                .clicked()
-                            {
-                                if resting_button_on {
-                                    self.to_resting();
-                                    match_states(self);
-                                } else {
-                                    debug!("Button not currently functional in this state");
-                                }
-                            }
-                        });
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        if ui
+                                            .add_enabled(
+                                                resting_button_on,
+                                                egui::Button::new("Pause Practice Session"),
+                                            )
+                                            .clicked()
+                                        {
+                                            if resting_button_on {
+                                                self.to_resting();
+                                                match_states(self);
+                                            } else {
+                                                debug!(
+                                                    "Button not currently functional in this state"
+                                                );
+                                            }
+                                        }
+                                    },
+                                );
 
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            if ui
-                                .add_enabled(
-                                    working_button_on,
-                                    egui::Button::new("Resume Practice Session"),
-                                )
-                                .clicked()
-                            {
-                                if working_button_on {
-                                    self.to_working();
-                                    match_states(self);
-                                } else {
-                                    debug!("Button not currently functional in this state");
-                                }
-                            }
-                        });
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        if ui
+                                            .add_enabled(
+                                                working_button_on,
+                                                egui::Button::new("Resume Practice Session"),
+                                            )
+                                            .clicked()
+                                        {
+                                            if working_button_on {
+                                                self.to_working();
+                                                match_states(self);
+                                            } else {
+                                                debug!(
+                                                    "Button not currently functional in this state"
+                                                );
+                                            }
+                                        }
+                                    },
+                                );
 
-                        ui.end_row();
+                                ui.end_row();
 
-                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
-                            if ui.button("End Practice Session").clicked() {
-                                self.to_finishing();
-                                match_states(self);
+                                ui.with_layout(
+                                    egui::Layout::top_down_justified(Align::LEFT),
+                                    |ui| {
+                                        if ui.button("End Practice Session").clicked() {
+                                            self.to_finishing();
+                                            match_states(self);
 
-                                // Send command to exit
-                                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                            }
+                                            // Send command to exit
+                                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                                        }
+                                    },
+                                );
+                            });
+
+                        ui.separator();
+
+                        ui.add(egui::github_link_file!(
+                            "https://github.com/alexei-ozerov/jovian-cycles/tree/main/",
+                            "Source code."
+                        ));
+
+                        ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
+                            powered_by_egui_and_eframe(ui);
+                            egui::warn_if_debug_build(ui);
                         });
                     });
-
-                ui.separator();
-
-                ui.add(egui::github_link_file!(
-                    "https://github.com/alexei-ozerov/jovian-cycles/tree/main/",
-                    "Source code."
-                ));
-
-                ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                    powered_by_egui_and_eframe(ui);
-                    egui::warn_if_debug_build(ui);
                 });
-            });
         });
     }
 }
