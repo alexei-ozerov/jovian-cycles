@@ -58,27 +58,24 @@ impl eframe::App for PracticeSessionState {
                 .default_width(150.0)
                 .show(ctx, |ui| {
                     ui.vertical_centered_justified(|ui| {
+                        ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
+                            match self.session_data.current_key_data {
+                                Some(data) => {
+                                    ui.heading(format!(
+                                        "Your current key is: {}",
+                                        self.note_name_list[data.nid].clone()
+                                    ));
+                                }
+                                None => {
+                                    ui.heading("No current key.");
+                                }
+                            }
+                        });
+
                         egui::Grid::new("center_pane")
                             .min_col_width(120.0)
                             .max_col_width(150.0)
                             .show(ui, |ui| {
-                                ui.with_layout(
-                                    egui::Layout::top_down_justified(Align::LEFT),
-                                    |ui| match self.session_data.current_key_data {
-                                        Some(data) => {
-                                            ui.heading(format!(
-                                                "Your current key is: {}",
-                                                self.note_name_list[data.nid].clone()
-                                            ));
-                                        }
-                                        None => {
-                                            ui.heading("No current key.");
-                                        }
-                                    },
-                                );
-
-                                ui.end_row();
-
                                 let mut working_button_on = false;
                                 let mut resting_button_on = false;
                                 let mut skip_button_on = false;
