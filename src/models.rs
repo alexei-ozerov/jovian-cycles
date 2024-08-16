@@ -12,12 +12,12 @@ pub type TimeCode = (String, i64);
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct KeyData {
     pub nid: usize,
-    repetitions: i32,
+    pub(crate) repetitions: i32,
     weight: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct KeysMap(Vec<KeyData>);
+pub struct KeysMap(pub Vec<KeyData>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Receipt {
@@ -28,7 +28,7 @@ pub struct Receipt {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PracticeSessionData {
     pub practice_session_history: Option<Vec<TimeCode>>, // Aggregate practice session time data
-    all_keys_map: KeysMap, // Aggregate data about keys, repetitions, and probability
+    pub all_keys_map: KeysMap, // Aggregate data about keys, repetitions, and probability
     pub current_key_data: Option<KeyData>, // Data associated with current key
     start_timestamp: Option<TimeCode>, // State name and start timestamp
     pub receipt: Option<Receipt>, // Receipt of practice session given when process finishes
@@ -52,6 +52,26 @@ impl PracticeSessionData {
             current_key_data: None,
             start_timestamp: None,
             receipt: None,
+        }
+    }
+
+    pub fn reset(self) -> Self {
+        let mut keys_map_vec = Vec::new();
+        for id in 0..12 {
+            let keys_map_data = KeyData {
+                nid: id,
+                repetitions: 0,
+                weight: 100,
+            };
+            keys_map_vec.push(keys_map_data);
+        }
+
+        PracticeSessionData {
+            practice_session_history: None,
+            all_keys_map: KeysMap(keys_map_vec),
+            current_key_data: None,
+            start_timestamp: None,
+            receipt: self.receipt.clone(),
         }
     }
 

@@ -3,6 +3,7 @@ use crate::utils::match_states;
 
 use egui::{Align, Direction, Visuals};
 use log::{debug, info, error};
+use crate::models::{KeysMap, Receipt};
 
 impl PracticeSessionState {
     /// Called once before the first frame.
@@ -47,14 +48,41 @@ impl eframe::App for PracticeSessionState {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // TODO: (ozerova) - Make the "X" button in the UI change the state.
-            // egui::Window::new("Reports")
-            //     .open(&mut self.report_enabled)
-            //     .resizable([true, true])
-            //     .default_width(100.0)
-            //     .show(ctx, |ui| ui.heading("WIP: reports"));
+            egui::Window::new("Practice Reports")
+                .open(&mut self.report_enabled)
+                .resizable([true, true])
+                .default_width(100.0)
+                .show(ctx, |ui|
+                    {
+                        egui::Grid::new("center_pane")
+                            .min_col_width(120.0)
+                            .max_col_width(150.0)
+                            .show(ui, |ui| {
+
+                                ui.label("Key Name");
+                                ui.label("Key Repetitions");
+                                ui.end_row();
+                                match self.session_data.receipt.clone() {
+                                    None => {}
+                                    Some(receipt) => {
+                                        match receipt.key_data_archive.clone() {
+                                            None => {}
+                                            Some(history) => {
+                                                history.0.iter().for_each(|key| {
+                                                    ui.label(format!("{}", self.note_name_list[key.nid]));
+                                                    ui.label(format!("{}", key.repetitions));
+                                                    ui.end_row();
+                                                });
+                                            }
+                                        }
+
+                                    }
+                                };
+                            });
+                    });
 
             egui::Window::new("Jovian Cycles")
+                // TODO: (ozerova) - figure out how to use the state without cloning.
                 .open(&mut self.cycle_window_open.clone())
                 .resizable([true, true])
                 .default_width(100.0)
@@ -111,6 +139,9 @@ impl eframe::App for PracticeSessionState {
                                         if ui.button("Request New Key").clicked() {
                                             self.to_requesting_new_key();
                                             match_states(self);
+
+                                            self.to_working();
+                                            match_states(self);
                                         }
                                     },
                                 );
@@ -126,10 +157,15 @@ impl eframe::App for PracticeSessionState {
                                             .clicked()
                                         {
                                             if skip_button_on {
-                                                info!("Skipping current key!");
-                                                self.decrement_key();
+                                                self.to_skipping_key();
+                                                match_states(self);
+
                                                 self.to_requesting_new_key();
                                                 match_states(self);
+
+                                                self.to_working();
+                                                match_states(self);
+
                                             } else {
                                                 debug!(
                                                     "Button not currently functional in this state"

@@ -1,4 +1,4 @@
-use crate::models::PracticeSessionData;
+use crate::models::{PracticeSessionData, TimeCode};
 
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 pub enum SessionStates {
     Waiting,
     RequestingNewKey,
+    SkippingKey,
     Working,
     Resting,
     Finishing,
@@ -80,6 +81,34 @@ impl PracticeSessionState {
     // (Requesting New Key) State function
     pub fn requesting_new_key(&mut self) {
         self.session_data.get_new_key();
+    }
+
+    pub fn to_skipping_key(&mut self) {
+        self.session_state = SessionStates::SkippingKey;
+    }
+
+    pub fn skipping_key(&mut self) {
+        self.decrement_key();
+
+        info!("Pre Truncation: {:#?}", self.session_data.practice_session_history);
+
+        // Remove last history
+        match self.session_data.practice_session_history.clone() {
+            None => {}
+            Some(mut history) => {
+                let length = history.len();
+                if length > 1 {
+                    history.truncate(length - 1);
+                    self.session_data.practice_session_history = Some(history);
+                }
+            }
+        };
+
+        info!("Post Truncation: {:#?}", self.session_data.practice_session_history);
+    }
+
+    pub fn to_waiting(&mut self) {
+        self.session_state = SessionStates::Waiting;
     }
 
     // (Working) Transition function
