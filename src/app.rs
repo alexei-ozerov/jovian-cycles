@@ -53,7 +53,7 @@ impl eframe::App for PracticeSessionState {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical_centered_justified(|ui| {
                 egui::Grid::new("center_pane")
-                    .min_col_width(500.0)
+                    .min_col_width(250.0)
                     .show(ui, |ui| {
                         ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
                             ui.heading("Jovian Cycles Practice Tool");
@@ -67,9 +67,7 @@ impl eframe::App for PracticeSessionState {
                                     ));
                                 }
                                 None => {
-                                    ui.heading(
-                                        "No current key generated, please request a new key!",
-                                    );
+                                    ui.heading("No current key.");
                                 }
                             }
                         });
