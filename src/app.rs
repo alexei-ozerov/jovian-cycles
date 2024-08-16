@@ -128,7 +128,7 @@ impl eframe::App for PracticeSessionState {
             ui.separator();
 
             ui.add(egui::github_link_file!(
-                "https://github.com/alexei-ozerov/jovian-cycles/",
+                "https://github.com/alexei-ozerov/jovian-cycles/tree/main/",
                 "Source code."
             ));
 
