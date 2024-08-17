@@ -52,7 +52,6 @@ pub fn match_states(state: &mut PracticeSessionState) {
             }
 
             info!("Gracefully exiting practice session.");
-            state.report_enabled = true;
 
             // Wipe session data while keeping receipt
             state.session_data = state.session_data.clone().reset();

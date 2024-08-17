@@ -22,10 +22,6 @@ pub struct PracticeSessionState {
     #[serde(skip)]
     pub theme: catppuccin_egui::Theme,
     #[serde(skip)]
-    pub report_enabled: bool,
-    #[serde(skip)]
-    pub cycle_window_open: bool,
-    #[serde(skip)]
     pub note_name_list: Vec<String>,
     #[serde(skip)]
     pub session_state: SessionStates,
@@ -47,8 +43,6 @@ impl Default for PracticeSessionState {
     fn default() -> Self {
         PracticeSessionState {
             theme: catppuccin_egui::LATTE,
-            report_enabled: false,
-            cycle_window_open: true,
             note_name_list: vec![
                 "C".to_owned(),
                 "C#".to_owned(),
@@ -90,7 +84,10 @@ impl PracticeSessionState {
     pub fn skipping_key(&mut self) {
         self.decrement_key();
 
-        info!("Pre Truncation: {:#?}", self.session_data.practice_session_history);
+        info!(
+            "Pre Truncation: {:#?}",
+            self.session_data.practice_session_history
+        );
 
         // Remove last history
         match self.session_data.practice_session_history.clone() {
@@ -104,7 +101,10 @@ impl PracticeSessionState {
             }
         };
 
-        info!("Post Truncation: {:#?}", self.session_data.practice_session_history);
+        info!(
+            "Post Truncation: {:#?}",
+            self.session_data.practice_session_history
+        );
     }
 
     pub fn to_waiting(&mut self) {
@@ -160,6 +160,8 @@ impl PracticeSessionState {
                 };
             }
         };
+
+        self.session_data.receipt = Some(self.session_data.construct_receipt());
     }
 
     // (Resting) Transition function

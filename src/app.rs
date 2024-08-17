@@ -1,9 +1,9 @@
 use crate::transitions::{PracticeSessionState, SessionStates};
 use crate::utils::match_states;
 
-use egui::{Align, Direction, Visuals};
-use log::{debug, info, error};
 use crate::models::{KeysMap, Receipt};
+use egui::{Align, Direction, Visuals};
+use log::{debug, error, info};
 
 impl PracticeSessionState {
     /// Called once before the first frame.
@@ -24,7 +24,6 @@ impl PracticeSessionState {
 impl eframe::App for PracticeSessionState {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
@@ -49,41 +48,34 @@ impl eframe::App for PracticeSessionState {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::Window::new("Practice Reports")
-                .open(&mut self.report_enabled)
                 .resizable([true, true])
                 .default_width(100.0)
-                .show(ctx, |ui|
-                    {
-                        egui::Grid::new("center_pane")
-                            .min_col_width(120.0)
-                            .max_col_width(150.0)
-                            .show(ui, |ui| {
-
-                                ui.label("Key Name");
-                                ui.label("Key Repetitions");
-                                ui.end_row();
-                                match self.session_data.receipt.clone() {
+                .show(ctx, |ui| {
+                    egui::Grid::new("center_pane")
+                        .min_col_width(120.0)
+                        .max_col_width(150.0)
+                        .show(ui, |ui| {
+                            ui.label("Key Name");
+                            ui.label("Key Repetitions");
+                            ui.end_row();
+                            match self.session_data.receipt.clone() {
+                                None => {}
+                                Some(receipt) => match receipt.key_data_archive.clone() {
                                     None => {}
-                                    Some(receipt) => {
-                                        match receipt.key_data_archive.clone() {
-                                            None => {}
-                                            Some(history) => {
-                                                history.0.iter().for_each(|key| {
-                                                    ui.label(format!("{}", self.note_name_list[key.nid]));
-                                                    ui.label(format!("{}", key.repetitions));
-                                                    ui.end_row();
-                                                });
-                                            }
-                                        }
-
+                                    Some(history) => {
+                                        history.0.iter().for_each(|key| {
+                                            ui.label(format!("{}", self.note_name_list[key.nid]));
+                                            ui.label(format!("{}", key.repetitions));
+                                            ui.end_row();
+                                        });
                                     }
-                                };
-                            });
-                    });
+                                },
+                            };
+                        });
+                });
 
             egui::Window::new("Jovian Cycles")
                 // TODO: (ozerova) - figure out how to use the state without cloning.
-                .open(&mut self.cycle_window_open.clone())
                 .resizable([true, true])
                 .default_width(100.0)
                 .show(ctx, |ui| {
@@ -165,7 +157,6 @@ impl eframe::App for PracticeSessionState {
 
                                                 self.to_working();
                                                 match_states(self);
-
                                             } else {
                                                 debug!(
                                                     "Button not currently functional in this state"
