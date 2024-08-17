@@ -62,6 +62,7 @@ impl eframe::App for PracticeSessionState {
                         .show(ui, |ui| {
                             ui.label("Key Name");
                             ui.label("Key Repetitions");
+                            ui.label("Duration");
                             ui.end_row();
                             match self.session_data.receipt.clone() {
                                 None => {}
@@ -71,6 +72,7 @@ impl eframe::App for PracticeSessionState {
                                         history.0.iter().for_each(|key| {
                                             ui.label(format!("{}", self.note_name_list[key.nid]));
                                             ui.label(format!("{}", key.repetitions));
+                                            ui.label(format!("{}", "TBA..."));
                                             ui.end_row();
                                         });
                                     }
