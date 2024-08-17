@@ -43,6 +43,11 @@ impl eframe::App for PracticeSessionState {
                 });
 
                 catppuccin_egui::set_theme(ctx, self.theme);
+                ui.ctx().memory_mut(|mem| mem.reset_areas());
+
+                if ui.button("Organize windows").clicked() {
+                    ui.ctx().memory_mut(|mem| mem.reset_areas());
+                };
             });
         });
 
@@ -50,6 +55,7 @@ impl eframe::App for PracticeSessionState {
             egui::Window::new("Practice Report")
                 .resizable([true, true])
                 .default_width(100.0)
+                .default_pos(egui::Pos2 {x: 20.0, y: 80.0})
                 .show(ctx, |ui| {
                     egui::Grid::new("center_pane")
                         .min_col_width(120.0)
@@ -78,6 +84,8 @@ impl eframe::App for PracticeSessionState {
                 // TODO: (ozerova) - figure out how to use the state without cloning.
                 .resizable([true, true])
                 .default_width(100.0)
+                .max_height(150.0)
+                .default_pos(egui::Pos2 {x: 20.0, y: 30.0})
                 .show(ctx, |ui| {
                     ui.vertical_centered_justified(|ui| {
                         ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
