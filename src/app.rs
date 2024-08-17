@@ -57,8 +57,8 @@ impl eframe::App for PracticeSessionState {
                 .default_pos(egui::Pos2 {x: 15.0, y: 250.0})
                 .show(ctx, |ui| {
                     egui::Grid::new("center_pane")
-                        .min_col_width(120.0)
-                        .max_col_width(150.0)
+                        .min_col_width(80.0)
+                        .max_col_width(100.0)
                         .show(ui, |ui| {
                             ui.label("Key Name");
                             ui.label("Key Repetitions");
