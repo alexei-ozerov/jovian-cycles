@@ -54,7 +54,7 @@ impl eframe::App for PracticeSessionState {
             egui::Window::new("Practice Report")
                 .resizable([true, true])
                 .default_width(100.0)
-                .default_pos(egui::Pos2 {x: 15.0, y: 200.0})
+                .default_pos(egui::Pos2 {x: 15.0, y: 250.0})
                 .show(ctx, |ui| {
                     egui::Grid::new("center_pane")
                         .min_col_width(120.0)
@@ -84,7 +84,7 @@ impl eframe::App for PracticeSessionState {
                 .resizable([true, true])
                 .default_width(100.0)
                 .max_height(150.0)
-                .default_pos(egui::Pos2 {x: 15.0, y: 50.0})
+                .default_pos(egui::Pos2 {x: 15.0, y: 40.0})
                 .show(ctx, |ui| {
                     ui.vertical_centered_justified(|ui| {
                         ui.with_layout(egui::Layout::top_down_justified(Align::LEFT), |ui| {
