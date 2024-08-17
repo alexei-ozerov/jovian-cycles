@@ -47,7 +47,7 @@ impl eframe::App for PracticeSessionState {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            egui::Window::new("Practice Reports")
+            egui::Window::new("Practice Report")
                 .resizable([true, true])
                 .default_width(100.0)
                 .show(ctx, |ui| {
@@ -74,7 +74,7 @@ impl eframe::App for PracticeSessionState {
                         });
                 });
 
-            egui::Window::new("Jovian Cycles")
+            egui::Window::new("Session Controls")
                 // TODO: (ozerova) - figure out how to use the state without cloning.
                 .resizable([true, true])
                 .default_width(100.0)
