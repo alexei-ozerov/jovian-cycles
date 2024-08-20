@@ -4,6 +4,13 @@ use log::{debug, info};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
+// TODO: (ozerova) - Refactor data model to make tracking time easier
+//                      * Add "previous_key" field
+//                      * Figure out how to track total time spend on a key
+// TODO: (ozerova) - Add methods for determining how much time has been spend practicing a key
+// TODO: (ozerova) - Refactor TimeCode type
+// TODO: (ozerova) - Create better state tracking that isn't a String identifier (use the enums)
+
 /*
  * Generic Data Types
  */
@@ -12,7 +19,9 @@ pub type TimeCode = (String, i64);
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct KeyData {
     pub nid: usize,
-    pub(crate) repetitions: i32,
+    pub repetitions: i32,
+    pub current_time_practiced: i32, 
+    pub total_time_practiced: i32,
     weight: i32,
 }
 
@@ -30,6 +39,7 @@ pub struct PracticeSessionData {
     pub practice_session_history: Option<Vec<TimeCode>>, // Aggregate practice session time data
     pub all_keys_map: KeysMap, // Aggregate data about keys, repetitions, and probability
     pub current_key_data: Option<KeyData>, // Data associated with current key
+    pub previous_key_data: Option<KeyData>, // Data associated with previous key
     start_timestamp: Option<TimeCode>, // State name and start timestamp
     pub receipt: Option<Receipt>, // Receipt of practice session given when process finishes
 }
@@ -41,6 +51,8 @@ impl PracticeSessionData {
             let keys_map_data = KeyData {
                 nid: id,
                 repetitions: 0,
+                current_time_practiced: 0,
+                total_time_practiced: 0,
                 weight: 100,
             };
             keys_map_vec.push(keys_map_data);
@@ -50,6 +62,7 @@ impl PracticeSessionData {
             practice_session_history: None,
             all_keys_map: KeysMap(keys_map_vec),
             current_key_data: None,
+            previous_key_data: None,
             start_timestamp: None,
             receipt: None,
         }
